@@ -3,6 +3,40 @@ const router = express.Router();
 const productModel = require('../models/productModel');
 const storeModel = require('../models/storeModel');
 
+// GET /api/products/store/:storeId
+// Added to allow fetching products for a specific store
+router.get('/store/:storeId', async (req, res) => {
+    try {
+        const storeId = req.params.storeId;
+        const limit = req.query.limit || 20;
+        const offset = req.query.offset || 0;
+
+        const products = await productModel.getProducts(storeId, limit, offset);
+        res.status(200).json({ is_success: true, data: products });
+    } catch (error) {
+        console.error('Fetch products error:', error);
+        res.status(500).json({ is_success: false, message: "Internal server error." });
+    }
+});
+
+// GET /api/products/:productId
+// Added to fetch a single product detail
+router.get('/:productId', async (req, res) => {
+    try {
+        const productId = req.params.productId;
+        const product = await productModel.getProductById(productId);
+        
+        if (!product) {
+            return res.status(404).json({ is_success: false, message: "Product not found." });
+        }
+
+        res.status(200).json({ is_success: true, data: product });
+    } catch (error) {
+        console.error('Fetch product error:', error);
+        res.status(500).json({ is_success: false, message: "Internal server error." });
+    }
+});
+
 // POST /api/products
 router.post('/', async (req, res) => {
     try {
