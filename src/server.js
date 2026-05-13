@@ -2,6 +2,9 @@ require('dotenv').config();
 const express = require('express');
 const { initDb } = require('./db');
 
+// Import middleware
+const authLogger = require('./middlewares/authLogger');
+
 // Import separate routes
 const loginRoute = require('./routes/login');
 const registerRoute = require('./routes/register');
@@ -12,6 +15,7 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(express.json());
+app.use(authLogger); // Global middleware for logging and token verification
 
 // Register Routes
 app.use('/api/account/v1/login', loginRoute);

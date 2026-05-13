@@ -43,6 +43,16 @@ const initDb = async () => {
                     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
                 );
             `);
+            await connection.query(`
+                CREATE TABLE IF NOT EXISTS logs (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    method VARCHAR(10) NOT NULL,
+                    url TEXT NOT NULL,
+                    user_id INT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+                );
+            `);
         } finally {
             connection.release();
         }
@@ -72,6 +82,16 @@ const initDb = async () => {
                         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+                    );
+                `);
+                sqliteDb.run(`
+                    CREATE TABLE IF NOT EXISTS logs (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        method TEXT NOT NULL,
+                        url TEXT NOT NULL,
+                        user_id INTEGER,
+                        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
                     );
                 `, (err) => {
                     if (err) reject(err);
