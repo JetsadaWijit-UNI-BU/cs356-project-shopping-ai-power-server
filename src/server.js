@@ -9,6 +9,9 @@ const authLogger = require('./middlewares/authLogger');
 const loginRoute = require('./routes/login');
 const registerRoute = require('./routes/register');
 const profileRoute = require('./routes/profile');
+const storeRoute = require('./routes/stores');
+const productRoute = require('./routes/products');
+const transactionRoute = require('./routes/transactions');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -21,6 +24,11 @@ app.use(authLogger); // Global middleware for logging and token verification
 app.use('/api/account/v1/login', loginRoute);
 app.use('/api/account/v1/register', registerRoute);
 app.use('/api/account/v1/profile', profileRoute);
+
+// Business logic Routes
+app.use('/api/stores', storeRoute);
+app.use('/api/products', productRoute);
+app.use('/api/transactions', transactionRoute);
 
 // Initialize Database and Start Server
 const startServer = async () => {
