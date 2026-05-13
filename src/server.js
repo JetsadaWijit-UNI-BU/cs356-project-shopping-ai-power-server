@@ -1,16 +1,22 @@
 require('dotenv').config();
 const express = require('express');
 const { initDb } = require('./db');
-const authRoutes = require('./routes/authRoutes');
+
+// Import separate routes
+const loginRoute = require('./routes/login');
+const registerRoute = require('./routes/register');
+const profileRoute = require('./routes/profile');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware to parse JSON bodies
+// Middleware
 app.use(express.json());
 
-// Routes
-app.use('/api/auth', authRoutes);
+// Register Routes
+app.use('/api/account/v1/login', loginRoute);
+app.use('/api/account/v1/register', registerRoute);
+app.use('/api/account/v1/profile', profileRoute);
 
 // Initialize Database and Start Server
 const startServer = async () => {
