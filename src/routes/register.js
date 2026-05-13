@@ -18,7 +18,11 @@ router.post('/', async (req, res) => {
         }
 
         const pwd_hash = await cryptoUtil.hashPassword(password);
-        const name_id = email.split('@')[0];
+        
+        // Prevent UNIQUE constraint violation by appending a random unique suffix
+        const baseNameId = email.split('@')[0];
+        const uniqueSuffix = cryptoUtil.generateToken().substring(0, 6);
+        const name_id = `${baseNameId}_${uniqueSuffix}`;
 
         await userModel.createUser({
             email,

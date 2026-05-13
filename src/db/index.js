@@ -123,6 +123,10 @@ const initDb = async () => {
         sqliteDb = new sqlite3.Database(dbPath);
         return new Promise((resolve, reject) => {
             sqliteDb.serialize(() => {
+                
+                // Enable foreign keys constraints for SQLite
+                sqliteDb.run('PRAGMA foreign_keys = ON;');
+                
                 sqliteDb.run(`
                     CREATE TABLE IF NOT EXISTS users (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
