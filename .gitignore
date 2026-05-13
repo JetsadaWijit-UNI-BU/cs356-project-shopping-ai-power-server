@@ -1,0 +1,6 @@
+# Environment variables
+*.env
+docker-compose.yml
+
+# Node modules
+node_modules

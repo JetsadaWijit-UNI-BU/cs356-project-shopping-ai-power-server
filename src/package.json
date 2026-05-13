@@ -1,0 +1,22 @@
+{
+  "name": "cs356-project-shopping-ai-power-server",
+  "version": "1.0.0",
+  "description": "Shopping Server with Express",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JetsadaWijit-UNI-BU/cs356-project-shopping-ai-power-server.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mysql2": "^3.9.7",
+    "sqlite3": "^5.1.7"
+  }
+}
