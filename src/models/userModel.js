@@ -1,8 +1,9 @@
 const db = require('../db');
 
-const createUser = async (nameId, email, pwdHash) => {
-    const query = `INSERT INTO users (name_id, email, pwd_hash) VALUES (?, ?, ?)`;
-    const insertId = await db.executeInsert(query, [nameId, email, pwdHash]);
+const createUser = async (userData) => {
+    const { email, pwd_hash, firstName, lastName, name_id } = userData;
+    const query = `INSERT INTO users (email, pwd_hash, firstName, lastName, name_id) VALUES (?, ?, ?, ?, ?)`;
+    const insertId = await db.executeInsert(query, [email, pwd_hash, firstName, lastName, name_id]);
     return insertId;
 };
 
@@ -12,7 +13,14 @@ const getUserByEmail = async (email) => {
     return rows.length > 0 ? rows[0] : null;
 };
 
+const getUserById = async (id) => {
+    const query = `SELECT id, email, firstName, lastName FROM users WHERE id = ?`;
+    const rows = await db.executeQuery(query, [id]);
+    return rows.length > 0 ? rows[0] : null;
+};
+
 module.exports = {
     createUser,
-    getUserByEmail
+    getUserByEmail,
+    getUserById
 };
