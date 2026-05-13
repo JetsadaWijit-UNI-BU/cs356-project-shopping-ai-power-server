@@ -23,12 +23,12 @@ const initDb = async () => {
             await connection.query(`
                 CREATE TABLE IF NOT EXISTS users (
                     id INT AUTO_INCREMENT PRIMARY KEY,
+                    profile_path TEXT NULL,
                     name_id VARCHAR(255) NOT NULL UNIQUE,
                     email VARCHAR(255) NOT NULL UNIQUE,
                     pwd_hash VARCHAR(255) NOT NULL,
                     firstName VARCHAR(255) NOT NULL,
                     lastName VARCHAR(255) NOT NULL,
-                    profile_path TEXT NULL,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
                 );
@@ -53,6 +53,68 @@ const initDb = async () => {
                     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
                 );
             `);
+            await connection.query(`
+                CREATE TABLE IF NOT EXISTS stores (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    user_id INT NOT NULL,
+                    display_name VARCHAR(255) NOT NULL,
+                    profile TEXT NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+                );
+            `);
+            await connection.query(`
+                CREATE TABLE IF NOT EXISTS store_members (
+                    user_id INT NOT NULL,
+                    store_id INT NOT NULL,
+                    role ENUM('owner', 'co-owner', 'admin', 'staff', 'member') NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    PRIMARY KEY (user_id, store_id),
+                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                    FOREIGN KEY (store_id) REFERENCES stores(id) ON DELETE CASCADE
+                );
+            `);
+            await connection.query(`
+                CREATE TABLE IF NOT EXISTS products (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    store_id INT NOT NULL,
+                    display_name VARCHAR(255) NOT NULL,
+                    price DECIMAL(12, 2) NOT NULL,
+                    pictures TEXT NOT NULL,
+                    description TEXT NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    FOREIGN KEY (store_id) REFERENCES stores(id) ON DELETE CASCADE
+                );
+            `);
+            await connection.query(`
+                CREATE TABLE IF NOT EXISTS transactions (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    user_id INT NOT NULL,
+                    store_id INT NOT NULL,
+                    total_amount DECIMAL(12, 2) NOT NULL,
+                    status ENUM('pending', 'paid', 'shipped', 'completed', 'cancelled') DEFAULT 'pending',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT,
+                    FOREIGN KEY (store_id) REFERENCES stores(id) ON DELETE RESTRICT
+                );
+            `);
+            await connection.query(`
+                CREATE TABLE IF NOT EXISTS transaction_items (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    transaction_id INT NOT NULL,
+                    product_id INT NOT NULL,
+                    quantity INT NOT NULL CHECK (quantity > 0),
+                    unit_price DECIMAL(12, 2) NOT NULL,
+                    subtotal DECIMAL(12, 2) NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE,
+                    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE RESTRICT
+                );
+            `);
         } finally {
             connection.release();
         }
@@ -64,12 +126,12 @@ const initDb = async () => {
                 sqliteDb.run(`
                     CREATE TABLE IF NOT EXISTS users (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        profile_path TEXT,
                         name_id TEXT NOT NULL UNIQUE,
                         email TEXT NOT NULL UNIQUE,
                         pwd_hash TEXT NOT NULL,
                         firstName TEXT NOT NULL,
                         lastName TEXT NOT NULL,
-                        profile_path TEXT,
                         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
                     );
@@ -92,6 +154,68 @@ const initDb = async () => {
                         user_id INTEGER,
                         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+                    );
+                `);
+                sqliteDb.run(`
+                    CREATE TABLE IF NOT EXISTS stores (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        user_id INTEGER NOT NULL,
+                        display_name TEXT NOT NULL,
+                        profile TEXT NOT NULL,
+                        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+                    );
+                `);
+                sqliteDb.run(`
+                    CREATE TABLE IF NOT EXISTS store_members (
+                        user_id INTEGER NOT NULL,
+                        store_id INTEGER NOT NULL,
+                        role TEXT NOT NULL,
+                        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        PRIMARY KEY (user_id, store_id),
+                        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                        FOREIGN KEY (store_id) REFERENCES stores(id) ON DELETE CASCADE
+                    );
+                `);
+                sqliteDb.run(`
+                    CREATE TABLE IF NOT EXISTS products (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        store_id INTEGER NOT NULL,
+                        display_name TEXT NOT NULL,
+                        price REAL NOT NULL,
+                        pictures TEXT NOT NULL,
+                        description TEXT NOT NULL,
+                        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        FOREIGN KEY (store_id) REFERENCES stores(id) ON DELETE CASCADE
+                    );
+                `);
+                sqliteDb.run(`
+                    CREATE TABLE IF NOT EXISTS transactions (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        user_id INTEGER NOT NULL,
+                        store_id INTEGER NOT NULL,
+                        total_amount REAL NOT NULL,
+                        status TEXT DEFAULT 'pending',
+                        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT,
+                        FOREIGN KEY (store_id) REFERENCES stores(id) ON DELETE RESTRICT
+                    );
+                `);
+                sqliteDb.run(`
+                    CREATE TABLE IF NOT EXISTS transaction_items (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        transaction_id INTEGER NOT NULL,
+                        product_id INTEGER NOT NULL,
+                        quantity INTEGER NOT NULL CHECK (quantity > 0),
+                        unit_price REAL NOT NULL,
+                        subtotal REAL NOT NULL,
+                        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE CASCADE,
+                        FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE RESTRICT
                     );
                 `, (err) => {
                     if (err) reject(err);
