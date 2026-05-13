@@ -19,7 +19,6 @@ const getStoreMemberRole = async (userId, storeId) => {
     return rows.length > 0 ? rows[0].role : null;
 };
 
-// Fix: Added missing implementations for members
 const addMember = async (userId, storeId, role) => {
     // Check if member already exists to prevent duplicate key error
     const existingRole = await getStoreMemberRole(userId, storeId);
@@ -46,10 +45,29 @@ const isMember = async (userId, storeId) => {
     return { is_member: false, role: null };
 };
 
+// Retrieve all stores associated with a specific user
+const getStoresByUserId = async (userId) => {
+    const query = `
+        SELECT s.id, s.display_name AS displayName, s.profile, sm.role 
+        FROM stores s 
+        JOIN store_members sm ON s.id = sm.store_id 
+        WHERE sm.user_id = ?
+    `;
+    return await db.executeQuery(query, [userId]);
+};
+
+// Update store details
+const updateStore = async (storeId, displayName, profile) => {
+    const query = `UPDATE stores SET display_name = ?, profile = ? WHERE id = ?`;
+    return await db.executeQuery(query, [displayName, profile, storeId]);
+};
+
 module.exports = {
     createStore,
     getStoreMemberRole,
     addMember,
     deleteMember,
-    isMember
+    isMember,
+    getStoresByUserId,
+    updateStore
 };
