@@ -25,8 +25,9 @@ router.post('/', async (req, res) => {
 router.get('/:storeId/products', async (req, res) => {
     try {
         const storeId = req.params.storeId;
-        // Pagination logic: default to page 1, fetch 10 items at a time
-        const page = parseInt(req.query.page) || 1;
+        
+        // Fix: Prevent negative offset by ensuring page is at least 1
+        const page = Math.max(1, parseInt(req.query.page) || 1);
         const limit = 10;
         const offset = (page - 1) * limit;
 
