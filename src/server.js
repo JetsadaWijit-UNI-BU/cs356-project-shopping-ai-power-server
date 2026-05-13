@@ -12,6 +12,7 @@ const profileRoute = require('./routes/profile');
 const storeRoute = require('./routes/stores');
 const productRoute = require('./routes/products');
 const transactionRoute = require('./routes/transactions');
+const aiRoute = require('./routes/ai');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -29,6 +30,9 @@ app.use('/api/account/v1/profile', profileRoute);
 app.use('/api/stores', storeRoute);
 app.use('/api/products', productRoute);
 app.use('/api/transactions', transactionRoute);
+
+// AI Routes
+app.use('/api/ai', aiRoute);
 
 // Initialize Database and Start Server
 const startServer = async () => {

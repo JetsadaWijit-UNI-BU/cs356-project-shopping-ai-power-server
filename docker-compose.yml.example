@@ -12,6 +12,8 @@ services:
       - DB_PASSWORD=rootpassword
       - DB_NAME=shopping_db
       - PORT=3000
+      - AI_PROVIDER=${AI_PROVIDER}
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
     depends_on:
       mysql_db:
         condition: service_healthy
